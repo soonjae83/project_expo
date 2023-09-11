@@ -1,0 +1,24 @@
+scan_filter_chain:
+- name: Angular1
+  type: laser_filters/LaserScanAngularBoundsFilterInPlace
+  params:
+    lower_angle: 0.42990162
+    upper_angle: 0.97565923
+
+- name: Angular2
+  type: laser_filters/LaserScanAngularBoundsFilterInPlace
+  params:
+    lower_angle: 2.0257938
+    upper_angle: 2.5020401
+
+- name: Angular3
+  type: laser_filters/LaserScanAngularBoundsFilterInPlace
+  params:
+    lower_angle: 3.78114521
+    upper_angle: 4.21686791
+
+- name: Angular4
+  type: laser_filters/LaserScanAngularBoundsFilterInPlace
+  params:
+    lower_angle: 5.27791005
+    upper_angle: 5.63328368
