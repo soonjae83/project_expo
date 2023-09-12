@@ -19,7 +19,7 @@ using namespace std;
 class Sensor{
 public:
     Sensor(){
-        pubCmdvel = nh.advertise<geometry_msgs::Twist("/cmd_vel", 10);
+        pubCmdvel = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
         pubUltraEnd = nh.advertise<std_msgs::String>("/ultra", 1);
 
         sub_turn_ultra = nh.subscribe("/ultra", 1, &Sensor::subUltra, this);
@@ -28,25 +28,26 @@ public:
     // 초음파 작동 //
     void ultra_move(string direction){
 
-        clock_t start_time, end_time, distance;
+        int start_time, end_time;
+        float distance;
 
         while (ros::ok())
         {
             digitalWrite(Trig, LOW);
-            delay(100);
+            delay(1000);
             digitalWrite(Trig, HIGH);
             delayMicroseconds(10);
             digitalWrite(Trig, LOW);
 
-            while (GPIO::input(Echo) == 0);
-            start_time = clock();
+            while (digitalRead(Echo) == 0);
+            start_time = micros();
 
-            while (GPIO::input(Echo) == 1);
-            end_time = clock();
+            while (digitalRead(Echo) == 1);
+            end_time = micros();
 
             distance = (end_time - start_time)/29./2.;
 
-            cout << "[INFO] Distance : " << distance << "cm\r" << end1;
+            cout << "[INFO] Distance : " << distance << "cm\r" << endl;
 
             if (direction == "forward"){
                 if (distance > 8){
@@ -69,9 +70,9 @@ public:
             cmd_vel.angular.z = 0.8;
         }
 
-        if (direction == "right"{
+        if (direction == "right"){
             cmd_vel.angular.z = -0.8;
-        })
+        }
 
         ROS_INFO("Turn 90deg start");
 
@@ -124,10 +125,14 @@ private:
 int main(int argc, char**argv){
     ros::init(argc, argv, "main");
 
-    GPIO::setmode(GPIO::BOARD);
-    GPIO::setwarnings(false);
-    GPIO::setup(Trig, GPIO::OUT);
-    GPIO::setup(Echo, GPIO::IN);
+
+    if (wiringPiSetup() == -1) {
+        ROS_ERROR("Failed to initialize WiringPi.");
+        return 1;
+    }
+
+    pinMode(Trig, OUTPUT);
+    pinMode(Echo, INPUT);
     
     ROS_INFO("SET UP ULTRA SENSOR");
 
