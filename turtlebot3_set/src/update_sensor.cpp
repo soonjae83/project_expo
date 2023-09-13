@@ -63,56 +63,11 @@ public:
         }
     }
 
-    // 90도 회전 //
-    void turn90deg(string direction){
-        if (direction == "left"){
-            cmd_vel.angular.z = 0.8;
-        }
-
-        if (direction == "right"){
-            cmd_vel.angular.z = -0.8;
-        }
-
-        ROS_INFO("Turn 90deg start");
-
-        for (int i = 0; i < 21; i++){
-            pubCmdvel.publish(cmd_vel);
-            delay(100);
-        }
-
-        cmd_vel.angular.z = 0.0;
-        pubCmdvel.publish(cmd_vel);
-        ROS_INFO("Turn 90deg end");
-    }
-    // 180도 회전 //
-    void turn180deg(string direction){
-        if (direction == "left"){
-            cmd_vel.angular.z = 0.785;
-        }
-        
-        if (direction == "right"){
-            cmd_vel.angular.z = -0.785;
-        }
-
-        ROS_INFO("Turn 180deg start");
-
-        for (int i = 0; i < 42; i++){
-            pubCmdvel.publish(cmd_vel);
-            delay(100);
-        }
-
-        cmd_vel.angular.z = 0.0;
-        pubCmdvel.publish(cmd_vel);
-        ROS_INFO("Turn 180deg end");
-    }
-
 private:
     ros::NodeHandle nh;
     
     ros::Publisher pubCmdvel;
     ros::Publisher pubUltraEnd;
-
-    ros::Subscriber sub_turn_ultra;
 
     geometry_msgs::Twist cmd_vel;
     std_msgs::String end;
@@ -123,31 +78,59 @@ private:
 
 class Imu {
 public:
-    Imu(){
+    Imu() {
         pubCmdvel = nh.advertise<geometry_msgs::Twist>("/cmd_vel_imu", 10);
 
         sub_turn_imu = nh.subscribe("/imu", 1, &Imu::subImu, this);
 
         target_yaw = 0.0;
+        is_turning = false;
+        rotation_direction = 0.0;
+
+        cmd_vel.angular.z = rotation_direction;
     }
 
-    void subImu(const sensor_msgs::Imu::ConstPtr& imu_msg){
-        double current_yaw = getYawFromIMU(imu_msg);
+    void turn90deg(string direction) {
+        if (!is_turning) {
+            if(direction == "left") {
+                target_yaw += 1.5708;  // 90도 회전 (라디안 단위)
+                rotation_direction = 0.8;
+            }
 
-        double yaw_error = target_yaw - current_yaw;
+            if (direction == "right") {
+                target_yaw -= 1.5708;  
+                rotation_direction = -0.8;
+            }
 
-        double rotation_speed = calculateRotationSpeed(yaw_error);
+            is_turning(true);
+            ROS_INFO("Turn 90deg start");
+        }    
+    }
 
-        geometry_msgs::Twist cmd_vel;
-        cmd_vel.angular.z = rotation_speed;
-        cmd_vel_publisher_.publish(cmd_vel);
+    void turn180deg(string direction) {
+        if (!is_turning) {
+            if (direction == "left") {
+                target_yaw += 3.1416;  // 180도 회전 (라디안 단위)
+                rotation_direction = 0.8;
+            } 
+
+            if (direction == "right") {
+                target_yaw -= 3.1416;  // 180도 회전 (라디안 단위)
+                rotation_direction = -0.8;
+            }
+
+            is_turning = true;
+            ROS_INFO("Turn 180deg start");
+        }
     }
 
 private:
     ros::NodeHandle nh_;
     ros::Subscriber imu_subscriber_;
     ros::Publisher cmd_vel_publisher_;
-    double target_yaw_;
+    double target_yaw;
+    bool is_turning;
+    double rotation_direction;
 };
 
 int main(int argc, char**argv){
