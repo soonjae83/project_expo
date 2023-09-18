@@ -88,16 +88,16 @@ public:
     // 180도 회전 //
     void turn180deg(string direction){
         if (direction == "left"){
-            cmd_vel.angular.z = 0.785;
+            cmd_vel.angular.z = 0.8;
         }
         
         if (direction == "right"){
-            cmd_vel.angular.z = -0.785;
+            cmd_vel.angular.z = -0.8;
         }
 
         ROS_INFO("Turn 180deg start");
 
-        for (int i = 0; i < 42; i++){
+        for (int i = 0; i < 41; i++){
             pubCmdvel.publish(cmd_vel);
             delay(100);
         }
