@@ -76,9 +76,9 @@ public:
 
         ROS_INFO("Turn 90deg start");
 
-        for (int i = 0; i < 21; i++){
+        for (int i = 0; i < 206; i++){
             pubCmdvel.publish(cmd_vel);
-            delay(100);
+            delay(10);
         }
 
         cmd_vel.angular.z = 0.0;
@@ -97,7 +97,7 @@ public:
 
         ROS_INFO("Turn 180deg start");
 
-        for (int i = 0; i < 41; i++){
+        for (int i = 0; i < 403; i++){
             pubCmdvel.publish(cmd_vel);
             delay(100);
         }
