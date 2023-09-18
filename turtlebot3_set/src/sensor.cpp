@@ -99,7 +99,7 @@ public:
 
         for (int i = 0; i < 403; i++){
             pubCmdvel.publish(cmd_vel);
-            delay(100);
+            delay(10);
         }
 
         cmd_vel.angular.z = 0.0;
