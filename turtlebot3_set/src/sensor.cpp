@@ -11,7 +11,7 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 
-#define Trig 7
+#define Trig 4
 #define Echo 5
 
 using namespace std;
