@@ -11,8 +11,8 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 
-#define Trig 23
-#define Echo 32
+#define Trig 7
+#define Echo 5
 
 using namespace std;
 
@@ -106,7 +106,76 @@ public:
         pubCmdvel.publish(cmd_vel);
         ROS_INFO("Turn 180deg end");
     }
-    
+
+    void subUltra(const std_msgs::String ultra) {
+        //왼쪽 90도 회전 후 초음파 전진
+        if (strcmp(ultra.data.c_str(), "L90Front") == 0) {
+            ROS_INFO("TURN");
+            turn90deg("left");
+            delay(500);
+            ROS_INFO("Straight");
+            ultra_move("forward");
+            delay(500);
+            end.data = "end";
+            pubUltraEnd.publish(end);
+        }
+
+        //오른쪽 90도 회전 후 초음파 전진
+        if (strcmp(ultra.data.c_str(), "R90Front") == 0) {
+            ROS_INFO("TURN");
+            turn90deg("right");
+            delay(500);
+            ROS_INFO("Straight");
+            ultra_move("forward");
+            delay(500);
+            end.data = "end";
+            pubUltraEnd.publish(end);
+        }
+
+        //왼쪽 180도 회전 후 초음파 전진
+        if (strcmp(ultra.data.c_str(), "L180Front") == 0) {
+            ROS_INFO("TURN");
+            turn180deg("left");
+            delay(500);
+            ROS_INFO("Straight");
+            ultra_move("forward");
+            delay(500);
+            end.data = "end";
+            pubUltraEnd.publish(end);
+        }
+
+        //오른쪽 180도 회전 후 초음파 전진
+        if (strcmp(ultra.data.c_str(), "R180Front") == 0) {
+            ROS_INFO("TURN");
+            turn180deg("right");
+            delay(500);
+            ROS_INFO("Straight");
+            ultra_move("forward");
+            delay(500);
+            end.data = "end";
+            pubUltraEnd.publish(end);
+        }
+
+                // 90도 회전
+        if (strcmp(ultra.data.c_str(), "90") == 0 ) {
+            ROS_INFO("90turn");
+            turn90deg("left");
+        }
+
+        // 180도 회전
+        if (strcmp(ultra.data.c_str(), "180") == 0 ) {
+            ROS_INFO("180turn");
+            turn180deg("left");
+        }
+
+        // 초음파 전진
+        if (strcmp(ultra.data.c_str(), "forward") == 0) {
+            ROS_INFO("move to EV");
+            ultra_move("forward");
+        }
+    }
+
+
 private:
     ros::NodeHandle nh;
     
@@ -137,6 +206,8 @@ int main(int argc, char**argv){
     ROS_INFO("SET UP ULTRA SENSOR");
 
     Sensor sensor;
+
+    sensor.ultra_move("forward");
 
     ros::spin();
 
