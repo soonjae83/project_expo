@@ -11,8 +11,8 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 
-#define Trig 4
-#define Echo 5
+#define Trig 7           // GPIO 4
+#define Echo 29          // GPIO 5 
 
 using namespace std;
 
