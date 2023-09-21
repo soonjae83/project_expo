@@ -11,8 +11,8 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 
-#define Trig 7           // GPIO 4
-#define Echo 29          // GPIO 5 
+#define Trig 15 // BCM 14 (WiringPi 15)
+#define Echo 26 // BCM 12 (WiringPi 26)
 
 using namespace std;
 
@@ -156,7 +156,7 @@ public:
             pubUltraEnd.publish(end);
         }
 
-                // 90도 회전
+        // 90도 회전
         if (strcmp(ultra.data.c_str(), "90") == 0 ) {
             ROS_INFO("90turn");
             turn90deg("left");
@@ -168,10 +168,16 @@ public:
             turn180deg("left");
         }
 
-        // 초음파 전진
-        if (strcmp(ultra.data.c_str(), "forward") == 0) {
-            ROS_INFO("move to EV");
+        // 초음파 전진 후 180도 회전
+        if (strcmp(ultra.data.c_str(), "EVin") == 0) {
+            ROS_INFO("in to EV");
             ultra_move("forward");
+            delay(500);
+            ROS_INFO("180turn");
+            turn180deg("left");
+            delay(500);
+            end.data= "end";
+            pubUltraEnd.publish(end);
         }
     }
 
@@ -192,7 +198,7 @@ private:
 };
 
 int main(int argc, char**argv){
-    ros::init(argc, argv, "main");
+    ros::init(argc, argv, "Sensor");
 
 
     if (wiringPiSetup() == -1) {
@@ -206,8 +212,6 @@ int main(int argc, char**argv){
     ROS_INFO("SET UP ULTRA SENSOR");
 
     Sensor sensor;
-
-    sensor.ultra_move("forward");
 
     ros::spin();
 
