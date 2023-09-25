@@ -133,7 +133,7 @@ public:
         }
 
         // 초음파 전진
-        if (strcmp(ultra.data.c_str(), "ex_ev") == 0 {
+        if (strcmp(ultra.data.c_str(), "exit") == 0 {
             ROS_INFO("Exit_EV");
             ultra_move("ex_ev");
             delay(500);
