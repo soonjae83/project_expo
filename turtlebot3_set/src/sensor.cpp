@@ -121,13 +121,13 @@ public:
 
     void subUltra(const std_msgs::String ultra) {
         // 90도 회전
-        if (strcmp(ultra.data.c_str(), "90") == 0 ) {
+        if (strcmp(ultra.data.c_str(), "right90") == 0 ) {
             ROS_INFO("90turn");
             turn90deg("right");
         }
 
         // 180도 회전
-        if (strcmp(ultra.data.c_str(), "180") == 0 ) {
+        if (strcmp(ultra.data.c_str(), "right180") == 0 ) {
             ROS_INFO("180turn");
             turn180deg("right");
         }
