@@ -50,12 +50,24 @@ public:
             cout << "[INFO] Distance : " << distance << "cm\r" << endl;
 
             if (direction == "forward"){
-                if (distance > 8){
+                if (distance > 12.5){
                     cmd_vel.linear.x = 0.06;
                     pubCmdvel.publish(cmd_vel);
                 }
                 else {
                     cmd_vel.linear.x = 0.00;
+                    pubCmdvel.publish(cmd_vel);
+                    ROS_INFO("STOP");
+                    break;
+                }
+            }
+            if (direction == "ex_ev"){
+                if (distancd > 150){
+                    cmd_vel.linear.x = 0.06;
+                    pubCmdvel.publish(cmd_vel);
+                }
+                else {
+                    cmd_vel.linear.x == 0.00;
                     pubCmdvel.publish(cmd_vel);
                     ROS_INFO("STOP");
                     break;
@@ -121,9 +133,9 @@ public:
         }
 
         // 초음파 전진
-        if (strcmp(ultra.data.c_str(), "forward") == 0 {
-            ROS_INFO("Forward");
-            ultra_move("forward");
+        if (strcmp(ultra.data.c_str(), "ex_ev") == 0 {
+            ROS_INFO("Exit_EV");
+            ultra_move("ex_ev");
         }
 
         // 초음파 전진 후 180도 회전
