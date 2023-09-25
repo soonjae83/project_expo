@@ -168,6 +168,14 @@ public:
             turn180deg("left");
         }
 
+        // 초음파 전진
+        if (strcmp(ultra.data.c_str(), "forward") == 0 {
+            ROS_INFO("Forward");
+            ultra_move("forward");
+            delay(500);
+            end.data= "end";
+            pubUltraEnd.publish(end);
+
         // 초음파 전진 후 180도 회전
         if (strcmp(ultra.data.c_str(), "EVin") == 0) {
             ROS_INFO("in to EV");
