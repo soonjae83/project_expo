@@ -136,6 +136,10 @@ public:
         if (strcmp(ultra.data.c_str(), "ex_ev") == 0 {
             ROS_INFO("Exit_EV");
             ultra_move("ex_ev");
+            delay(500);
+            ROS_INFO("eixt_complete")
+            end.data=:"end";
+            pubUltraEnd.publish(end);
         }
 
         // 초음파 전진 후 180도 회전
