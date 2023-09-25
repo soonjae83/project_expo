@@ -145,7 +145,7 @@ void CheckModule(const std_msgs::String module) {
 // 파이어베이스 확인
 void CheckFirebase(const std_msgs::String firebase) {
     if (_ROBOT_LOCATE == FIRST_FLOOR) {    
-        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR_1fRoom || _ROBOT_FLAG == ARR_2fRoom) {
+        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR_1fRoom || _ROBOT_FLAG == ARR_2fRoom || _ROBOT_FLAG == MOVING) {
             if (strcmp(firebase.data.c_str(), "101_go") == 0) {
                 ROS_INFO("move_to_101");
                 pubPoseStamped.publish(poseStamped[0]);
@@ -205,7 +205,7 @@ void CheckFirebase(const std_msgs::String firebase) {
     }
 
     if (_ROBOT_LOCATE == SECOND_FLOOR) {    
-        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR_1fRoom || _ROBOT_FLAG == ARR_2fRoom) {
+        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR_1fRoom || _ROBOT_FLAG == ARR_2fRoom || _ROBOT_FLAG == MOVING) {
             if (strcmp(firebase.data.c_str(), "101_go") == 0) {
                 ROS_INFO("move_to_EV");
                 pubPoseStamped.publish(poseStamped[4]);
