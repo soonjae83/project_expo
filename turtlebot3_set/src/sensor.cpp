@@ -123,13 +123,13 @@ public:
         // 90도 회전
         if (strcmp(ultra.data.c_str(), "90") == 0 ) {
             ROS_INFO("90turn");
-            turn90deg("left");
+            turn90deg("right");
         }
 
         // 180도 회전
         if (strcmp(ultra.data.c_str(), "180") == 0 ) {
             ROS_INFO("180turn");
-            turn180deg("left");
+            turn180deg("right");
         }
 
         // 초음파 전진
