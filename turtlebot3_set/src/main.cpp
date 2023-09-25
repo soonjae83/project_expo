@@ -18,7 +18,6 @@ Main() {
 
     pubPoseStamped = nh.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1);
     pubUltra = nh.advertise<std_msgs::String>("/ultra", 1);
-    pubHotel = nh.advertise<std_msgs::String>("/hotel", 1);
     pubFirebase = nh.advertise<std_msgs::String>("/ros_to_firebase", 1000);
     pubElevator = nh.advertise<std_msgs::String>("/elevator", 1);
     pubRobot = nh.advertise<std_msgs::String>("/Check", 1);
@@ -32,9 +31,21 @@ Main() {
 
 enum RobotStatus {
     WAIT,
-    FRONT_1F
-    FRONT_2F
-    EV_IN
+    FRONT_1F,
+    FRONT_2F,
+    EV_IN,
+    EV_EXIT,
+    ARR,
+    MOVING,
+    MOVING_EV,
+    ARR_1fRoom,
+    ARR_2fRoom,
+    RETURN_LOBBY
+};
+
+enum RobotLocate {
+    FIRST_FLOOR,
+    SECOND_FLOOR
 };
 
 // 초기 좌표 설정
@@ -124,90 +135,247 @@ void fnInitParam() {
 void CheckModule(const std_msgs::String module) {
     if (strcmp(module.data.c_str(), "Hotel_Mode") == 0) {
         hotel = true;
-        _HOTEL_FLAG = WAIT;
+        _ROBOT_FLAG = WAIT;
+        _ROBOT_LOCATE = FIRST_FLOOR;
         ROS_INFO("Hotel Module Activated.");
         sleep(0.5);
     }
+}
 
 // 파이어베이스 확인
 void CheckFirebase(const std_msgs::String firebase) {
-    if (_HOTEL_FLAG == WAIT || ARR) {
-        if (strcmp(firebase.data.c_str(), "101_go") == 0) {
-            
+    if (_ROBOT_LOCATE == FIRST_FLOOR) {    
+        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR_1fRoom || _ROBOT_FLAG == ARR_2fRoom) {
+            if (strcmp(firebase.data.c_str(), "101_go") == 0) {
+                ROS_INFO("move_to_101");
+                pubPoseStamped.publish(poseStamped[0]);
+                sleep(5);
+                fb.data = "101_arrive";
+                pubFirebase.publish(fb);
+                ROS_INFO("arrive_to_101");
+                _ROBOT_FLAG == ARR_1fRoom;
+            }      
+            if (strcmp(firebase.data.c_str(), "102_go") == 0) {
+                ROS_INFO("move_to_102");
+                pubPoseStamped.publish(poseStamped[1]);
+                sleep(5);
+                fb.data = "102_arrive";
+                pubFirebase.publish(fb);
+                ROS_INFO("arrive_to_102");
+                _ROBOT_FLAG == ARR_1fRoom;  
+            }
+            if (strcmp(firebase.data.c_str(), "201_go") == 0) {
+                ROS_INFO("move_to_EV");
+                pubPoseStamped.publish(poseStamped[4]);
+                sleep(5);
+                _ROBOT_FLAG == MOVING_EV;
+                if (_ROBOT_LOCATE == SECOND_FLOOR) {
+                    ROS_INFO("move_to_201");
+                    pubPoseStamped.publish(poseStamped[0]);
+                    sleep(5);
+                    fb.data = "201_arrive";
+                    pubFirebase.publish(fb);
+                    ROS_INFO("arrive_to_201");
+                    _ROBOT_FLAG == ARR_2fRoom;
+                }
+            }
+            if (strcmp(firebase.data.c_str(), "202_go") == 0) {       
+                ROS_INFO("move_to_EV");
+                pubPoseStamped.publish(poseStamped[4]);
+                sleep(5);
+                _ROBOT_FLAG == MOVING_EV;
+                if (_ROBOT_LOCATE == SECOND_FLOOR) {
+                    ROS_INFO("move_to_202");
+                    pubPoseStamped.publish(poseStamped[1]);
+                    sleep(5);
+                    fb.data = "202_arrive";
+                    pubFirebase.publish(fb);
+                    ROS_INFO("arrive_to_202");
+                    _ROBOT_FLAG == ARR_2fRoom;
+                }
+            }
+            if (strcmp(firebase.data.c_str(), "home") == 0) {
+                ROS_INFO("return_to_lobby");
+                pubPoseStamped.publish(poseStamped[2]);
+                sleep(5);
+                ROS_INFO("arrive_to_Lobby");
+                _ROBOT_FLAG == RETURN_LOBBY;
+            }   
         }
+    }
 
-        if (strcmp(firebase.data.c_str(), "102_go") == 0) {
-            
-        }
-
-        if (strcmp(firebase.data.c_str(), "201_go") == 0) {
-            
-        }
-
-        if (strcmp(firebase.data.c_str(), "202_go") == 0) {
-            
+    if (_ROBOT_LOCATE == SECOND_FLOOR) {    
+        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR_1fRoom || _ROBOT_FLAG == ARR_2fRoom) {
+            if (strcmp(firebase.data.c_str(), "101_go") == 0) {
+                ROS_INFO("move_to_EV");
+                pubPoseStamped.publish(poseStamped[4]);
+                sleep(5);
+                _ROBOT_FLAG == MOVING_EV;
+                if (_ROBOT_LOCATE == FIRST_FLOOR) {
+                    ROS_INFO("move_to_101");
+                    pubPoseStamped.publish(poseStamped[0]);
+                    sleep(5);
+                    fb.data = "101_arrive";
+                    pubFirebase.publish(fb);
+                    ROS_INFO("arrive_to_101");
+                    _ROBOT_FLAG == ARR_1fRoom;
+                }
+            }
+            if (strcmp(firebase.data.c_str(), "102_go") == 0) {       
+                ROS_INFO("move_to_EV");
+                pubPoseStamped.publish(poseStamped[4]);
+                sleep(5);
+                _ROBOT_FLAG == MOVING_EV;
+                if (_ROBOT_LOCATE == FIRST_FLOOR) {
+                    ROS_INFO("move_to_102");
+                    pubPoseStamped.publish(poseStamped[1]);
+                    sleep(5);
+                    fb.data = "102_arrive";
+                    pubFirebase.publish(fb);
+                    ROS_INFO("arrive_to_102");
+                    _ROBOT_FLAG == ARR_1fRoom;
+                }
+            }
+            if (strcmp(firebase.data.c_str(), "201_go") == 0) {
+                ROS_INFO("move_to_201");
+                pubPoseStamped.publish(poseStamped[0]);
+                sleep(5);
+                fb.data = "201_arrive";
+                pubFirebase.publish(fb);
+                ROS_INFO("arrive_to_201");
+                _ROBOT_FLAG == ARR_2fRoom;
+            }      
+            if (strcmp(firebase.data.c_str(), "202_go") == 0) {
+                ROS_INFO("move_to_202");
+                pubPoseStamped.publish(poseStamped[1]);
+                sleep(5);
+                fb.data = "202_arrive";
+                pubFirebase.publish(fb);
+                ROS_INFO("arrive_to_202");
+                _ROBOT_FLAG == ARR_2fRoom;  
+            }
+            if (strcmp(firebase.data.c_str(), "home") == 0) {
+                ROS_INFO("move_to_ev");
+                pubPoseStamped.publish(poseStamped[4]);
+                sleep(5);
+                _ROBOT_FLAG == MOVING_EV;    
+                if (_ROBOT_LOCATE == FIRST_FLOOR) {
+                    ROS_INFO("return_to_lobby");
+                    pubPoseStamped.publish(poseStamped[2]);
+                    sleep(5);
+                    ROS_INFO("arrive_to_Lobby");
+                    _ROBOT_FLAG == RETURN_LOBBY;               
+                }
+            }   
         }
     }
 }
 
-// 로봇 도착 유무 확인
-void CheckArrival(const move_base_msgs::MoveBaseActionResult arrival)
-{
-
+void CheckArrival(const move_base_msgs::MoveBaseActionResult arrival) {
+    if (arrival.status.status == 3) {
+        if (_ROBOT_LOCATE == FIRST_FLOOR && _ROBOT_FLAG == MOVING_EV) {
+            ROS_INFO("front_of_1f");
+            _ROBOT_FLAG == FRONT_1F;
+        }
+        if (_ROBOT_LOCATE == SECOND_FLOOR && _ROBOT_FLAG == MOVING_EV) {
+            ROS_INFO("front_of_2f");
+            _ROBOT_FLAG == FRONT_2F;
+        }
+        if (_ROBOT_FLAG == RETURN_LOBBY) {
+            ROS_INFO("Lobby");
+            sleep(2);
+            _ROBOT_FLAG == WAIT;
+        }
+        else {
+            ROS_INFO("turn180deg");
+            sleep(5);
+            ultra.data = "right180";
+            pubUltra.publish(ultra);
+            sleep(5);
+            ROS_INFO("Next_Target");
+        }
+    }
+}
+void CheckUltra(const std_msgs::String ultra) {
+    // 엘레베이터 1층에서 탈출 후 // 
+    if (_ROBOT_LOCATE == FIRST_FLOOR) {
+        if (_ROBOT_FLAG == EV_EXIT && (strcmp(ultra.data.c_str(), "end") == 0)) { 
+            ROS_INFO("Arrive_1F");
+            sleep(5);
+            direction.data = "right";
+            pubUltra.publish(direction);
+            _ROBOT_FLAG == MOVING;
+        }
+    }
+    // 엘레베이터 2층에서 탈출 후 //
+    if (_ROBOT_LOCATE == SECOND_FLOOR) {
+        if (_ROBOT_FLAG == EV_EXIT && (strcmp(ultra.data.c_str(), "end") == 0)) {
+            ROS_INFO("Arrive_2F");
+            sleep(5);
+            direction.data = "right";
+            pubUltra.publish(direction);
+            _ROBOT_FLAG == MOVING;
+        }
+    }
 }
 
-// 초음파 센서 확인
-void CheckUltra(const std_msgs::String ultra)
-{
-
-}
 
 // 1층 -> 2층 //
 void CheckElevator(const std_msgs::String elevator) {
-    if (_HOTEL_FLAG == FRONT_1F ) {
+    // 1층 -> 2층 // 
+    if (_ROBOT_FLAG == FRONT_1F) {
         ev.data = "1F_open";
         pubElevator.publish(ev);
+        sleep(5);
         if (strcmp(elevator.data.c_str(), "first_open_in") == 0) {
             ROS_INFO("1F_door_open");
             ultra.data = "EVin";
             pubUltra.publish(ultra);
             sleep(5);
             ev.data = "1F_in";
-            pubElevator.publish(ev.data);
-            _HOTEL_FLAG == EV_IN
+            pubElevator.publish(ev);
+            _ROBOT_FLAG == EV_IN;
         }
-
-    if (_HOTEL_FLAG == FRONT_2F ) {
+    }
+    // 2층 -> 1층 //
+    if (_ROBOT_FLAG == FRONT_2F) {
         ev.data = "2F_open";
         pubElevator.publish(ev);
+        sleep(5);
         if (strcmp(elevator.data.c_str(), "second_open_in") == 0) {
             ROS_INFO("2F_door_open");
             ultra.data = "EVin";
             pubUltra.publish(ultra);
             sleep(5);
             ev.data = "2F_in";
-            pubElevator.publish(ev.data);
-            _HOTEL_FLAG == EV_IN
+            pubElevator.publish(ev);
+            _ROBOT_FLAG == EV_IN;
         }
+    }
 
-    if (_HOTEL_FLAG == EV_IN ) {
+    if (_ROBOT_FLAG == EV_IN) {
+    // 2층 도착//
         if (strcmp(elevator.data.c_str(), "second_open_out") == 0) {
+            _ROBOT_LOCATE == SECOND_FLOOR;
             ROS_INFO("2F_ARRIVE");
-            sleep(1);
-            pubPoseStamped.publish(poseStamped[3]);
+            sleep(2);
+            ultra.data = "exit";
+            pubUltra.publish(ultra);
+            sleep(2);
+            _ROBOT_FLAG == EV_EXIT;
         }
-    }
-
-    if (_HOTEL_FLAG == EV_IN ) {
+    // 1층 도착 //
         if (strcmp(elevator.data.c_str(), "first_open_out") == 0) {
+            _ROBOT_LOCATE == FIRST_FLOOR;
             ROS_INFO("1F_ARRIVE");
-            sleep(1);
-            pubPoseStamped.publish(poseStamped[3]);
+            sleep(2);
+            ultra.data = "exit";
+            pubUltra.publish(ultra);
+            sleep(2);
+            _ROBOT_FLAG == EV_EXIT;
         }
     }
-
-    }
-}u
+}
 
 private:
 ros::NodeHandle nh;
@@ -218,7 +386,6 @@ ros::Publisher pubPlate;
 ros::Publisher pubHotel;
 ros::Publisher pubElevator;
 ros::Publisher pubFirebase;
-ros::Publisher pubMapChange;
 ros::Publisher pubRobot;
 
 ros::Subscriber sub_arrival_status;
@@ -233,9 +400,11 @@ geometry_msgs::PoseStamped poseStamped[5];
 vector<double> target_pose_position;
 vector<double> target_pose_orientation;
 
-std_msgs::String ev
+int _ROBOT_FLAG, _ROBOT_LOCATE;
 
-bool hotel = false
+std_msgs::String ev, ultra, fb, direction;
+
+bool hotel = false;
 
 };
 
