@@ -134,8 +134,8 @@ public:
             ROS_INFO("Exit_EV");
             ultra_move("ex_ev");
             delay(9000);
-            ROS_INFO("eixt_complete")
-            end.data=:"end";
+            ROS_INFO("eixt_complete");
+            end.data= "end";
             pubUltraEnd.publish(end);
         }
 
