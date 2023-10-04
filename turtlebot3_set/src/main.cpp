@@ -318,7 +318,7 @@ void CheckUltra(const std_msgs::String ultra) {
     if (_ROBOT_LOCATE == FIRST_FLOOR) {
         if (_ROBOT_FLAG == EV_IN) {
             if (strcmp(ultra.data.c_str(), "end") == 0) {
-                ev.data = "1F_in"
+                ev.data = "1F_in";
                 pubElevator.publish(ev);
                 sleep(5);
                 _ROBOT_FLAG = EV_1F_ARR;
@@ -330,7 +330,7 @@ void CheckUltra(const std_msgs::String ultra) {
     if (_ROBOT_LOCATE == SECOND_FLOOR) {
         if (_ROBOT_FLAG == EV_IN) {
             if (strcmp(ultra.data.c_str(), "end") == 0) {
-                ev.data = "2F_in"
+                ev.data = "2F_in";
                 pubElevator.publish(ev);
                 sleep(5);
                 _ROBOT_FLAG = EV_2F_ARR;
@@ -379,7 +379,7 @@ void CheckElevator(const std_msgs::String elevator) {
             _ROBOT_FLAG = EV_EXIT;
         }
     }
-    
+
     if (_ROBOT_FLAG == EV_2F_ARR) {
     // 1층 도착 //
         if (strcmp(elevator.data.c_str(), "first_open_out") == 0) {
