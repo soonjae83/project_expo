@@ -26,7 +26,7 @@ public:
     }
 
     // 초음파 작동 //
-    void ultra_move(string direction){
+    void ultra_move(string direction) {
 
         int start_time, end_time;
         float distance;
@@ -49,7 +49,7 @@ public:
 
             cout << "[INFO] Distance : " << distance << "cm\r" << endl;
 
-            if (direction == "forward"){
+            if (direction == "forward") {
                 if (distance > 12.5){
                     cmd_vel.linear.x = 0.06;
                     pubCmdvel.publish(cmd_vel);
@@ -61,34 +61,31 @@ public:
                     break;
                 }
             }
-            if (direction == "ex_ev"){
-                if (distancd > 150){
-                    cmd_vel.linear.x = 0.06;
-                    pubCmdvel.publish(cmd_vel);
-                }
-                else {
-                    cmd_vel.linear.x == 0.00;
-                    pubCmdvel.publish(cmd_vel);
-                    ROS_INFO("STOP");
-                    break;
-                }
-            }
+            if (direction == "ex_ev") {
+                cmd_vel.linear.x = 0.08;
+                pubCmdvel.publish(cmd_vel);
+                delay(8000);
+                cmd_vel.linear.x == 0.00;
+                pubCmdvel.publish(cmd_vel);
+                ROS_INFO("STOP");
+                break;
+            }            
         }
     }
 
     // 90도 회전 //
-    void turn90deg(string direction){
-        if (direction == "left"){
+    void turn90deg(string direction) {
+        if (direction == "left") {
             cmd_vel.angular.z = 0.8;
         }
 
-        if (direction == "right"){
+        if (direction == "right") {
             cmd_vel.angular.z = -0.8;
         }
 
         ROS_INFO("Turn 90deg start");
 
-        for (int i = 0; i < 206; i++){
+        for (int i = 0; i < 206; i++) {
             pubCmdvel.publish(cmd_vel);
             delay(10);
         }
@@ -98,18 +95,18 @@ public:
         ROS_INFO("Turn 90deg end");
     }
     // 180도 회전 //
-    void turn180deg(string direction){
-        if (direction == "left"){
+    void turn180deg(string direction) {
+        if (direction == "left") {
             cmd_vel.angular.z = 0.8;
         }
         
-        if (direction == "right"){
+        if (direction == "right") {
             cmd_vel.angular.z = -0.8;
         }
 
         ROS_INFO("Turn 180deg start");
 
-        for (int i = 0; i < 403; i++){
+        for (int i = 0; i < 403; i++) {
             pubCmdvel.publish(cmd_vel);
             delay(10);
         }
@@ -133,10 +130,10 @@ public:
         }
 
         // 초음파 전진
-        if (strcmp(ultra.data.c_str(), "exit") == 0 {
+        if (strcmp(ultra.data.c_str(), "exit") == 0 ) {
             ROS_INFO("Exit_EV");
             ultra_move("ex_ev");
-            delay(500);
+            delay(9000);
             ROS_INFO("eixt_complete")
             end.data=:"end";
             pubUltraEnd.publish(end);
