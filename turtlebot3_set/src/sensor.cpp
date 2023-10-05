@@ -34,7 +34,7 @@ public:
         while (ros::ok())
         {
             digitalWrite(Trig, LOW);
-            delay(1000);
+            delay(100);
             digitalWrite(Trig, HIGH);
             delayMicroseconds(10);
             digitalWrite(Trig, LOW);
@@ -65,7 +65,7 @@ public:
                 cmd_vel.linear.x = 0.08;
                 pubCmdvel.publish(cmd_vel);
                 delay(8000);
-                cmd_vel.linear.x == 0.00;
+                cmd_vel.linear.x = 0.00;
                 pubCmdvel.publish(cmd_vel);
                 ROS_INFO("STOP");
                 break;
