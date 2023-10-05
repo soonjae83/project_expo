@@ -60,19 +60,26 @@ public:
                     ROS_INFO("STOP");
                     break;
                 }
-            }
-            if (direction == "ex_ev") {
-                cmd_vel.linear.x = 0.08;
-                pubCmdvel.publish(cmd_vel);
-                delay(8000);
-                cmd_vel.linear.x = 0.00;
-                pubCmdvel.publish(cmd_vel);
-                ROS_INFO("STOP");
-                break;
-            }            
+            }           
         }
     }
 
+    void exit_ev(string direction) {
+        if (direction == "ex_ev") {
+            cmd_vel.linear.x = 0.10;
+        }
+
+        ROS_INFO("Exit_Elevator");
+
+        for (int i = 0; i < 1010; i++) {
+            pubCmdvel.publish(cmd_vel);
+            delay(10);
+        }
+
+        cmd_vel.linear.x = 0.00;
+        pubCmdvel.publish(cmd_vel);
+        ROS_INFO("Exit_end");
+    }
     // 90도 회전 //
     void turn90deg(string direction) {
         if (direction == "left") {
@@ -132,8 +139,8 @@ public:
         // 초음파 전진
         if (strcmp(ultra.data.c_str(), "exit") == 0 ) {
             ROS_INFO("Exit_EV");
-            ultra_move("ex_ev");
-            delay(9000);
+            exit_ev("ex_ev");
+            delay(500);
             ROS_INFO("eixt_complete");
             end.data= "end";
             pubUltraEnd.publish(end);
