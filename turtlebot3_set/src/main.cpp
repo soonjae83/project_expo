@@ -36,7 +36,8 @@ enum RobotStatus {
     EV_IN,
     EV_1F_ARR,
     EV_2F_ARR,
-    EV_EXIT,
+    EV_1F_EXIT,
+    EV_2F_EXIT,
     ARR,
     MOVING_101,
     MOVING_102,
@@ -149,7 +150,7 @@ void CheckModule(const std_msgs::String module) {
 // 파이어베이스 확인
 void CheckFirebase(const std_msgs::String firebase) {
     if (_ROBOT_LOCATE == FIRST_FLOOR) {    
-        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR || _ROBOT_FLAG == EV_EXIT) {
+        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR) {
             if (strcmp(firebase.data.c_str(), "101_go") == 0) {
                 ultra.data = "right180";
                 pubUltra.publish(ultra);
@@ -173,7 +174,7 @@ void CheckFirebase(const std_msgs::String firebase) {
                 pubPoseStamped.publish(poseStamped[4]);
                 sleep(5);
                 _ROBOT_FLAG = MOVING_EV;
-                if (_ROBOT_LOCATE == SECOND_FLOOR) {
+                if (_ROBOT_LOCATE == SECOND_FLOOR && _ROBOT_FLAG == EV_2F_EXIT) {
                     ROS_INFO("move_to_201");
                     pubPoseStamped.publish(poseStamped[0]);
                     sleep(5);
@@ -187,7 +188,7 @@ void CheckFirebase(const std_msgs::String firebase) {
                 pubPoseStamped.publish(poseStamped[4]);
                 sleep(5);
                 _ROBOT_FLAG = MOVING_EV;
-                if (_ROBOT_LOCATE == SECOND_FLOOR) {
+                if (_ROBOT_LOCATE == SECOND_FLOOR && _ROBOT_FLAG == EV_2F_EXIT) {
                     ROS_INFO("move_to_202");
                     pubPoseStamped.publish(poseStamped[1]);
                     sleep(5);
@@ -206,7 +207,7 @@ void CheckFirebase(const std_msgs::String firebase) {
     }
 
     if (_ROBOT_LOCATE == SECOND_FLOOR) {    
-        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR || _ROBOT_FLAG == EV_EXIT) {
+        if (_ROBOT_FLAG == WAIT || _ROBOT_FLAG == ARR) {
             if (strcmp(firebase.data.c_str(), "101_go") == 0) {
                 ultra.data = "right180";
                 pubUltra.publish(ultra);                
@@ -214,7 +215,7 @@ void CheckFirebase(const std_msgs::String firebase) {
                 pubPoseStamped.publish(poseStamped[4]);
                 sleep(5);
                 _ROBOT_FLAG = MOVING_EV;
-                if (_ROBOT_LOCATE == FIRST_FLOOR) {
+                if (_ROBOT_LOCATE == FIRST_FLOOR && _ROBOT_FLAG == EV_1F_EXIT) {
                     ROS_INFO("move_to_101");
                     pubPoseStamped.publish(poseStamped[0]);
                     sleep(5);
@@ -228,7 +229,7 @@ void CheckFirebase(const std_msgs::String firebase) {
                 pubPoseStamped.publish(poseStamped[4]);
                 sleep(5);
                 _ROBOT_FLAG = MOVING_EV;
-                if (_ROBOT_LOCATE == FIRST_FLOOR) {
+                if (_ROBOT_LOCATE == FIRST_FLOOR && _ROBOT_FLAG == EV_1F_EXIT) {
                     ROS_INFO("move_to_102");
                     pubPoseStamped.publish(poseStamped[1]);
                     sleep(5);
@@ -258,7 +259,7 @@ void CheckFirebase(const std_msgs::String firebase) {
                 pubPoseStamped.publish(poseStamped[4]);
                 sleep(5);
                 _ROBOT_FLAG = MOVING_EV;    
-                if (_ROBOT_LOCATE == FIRST_FLOOR) {
+                if (_ROBOT_LOCATE == FIRST_FLOOR && _ROBOT_FLAG == EV_1F_EXIT) {
                     ROS_INFO("return_to_lobby");
                     pubPoseStamped.publish(poseStamped[2]);
                     sleep(5);
@@ -373,28 +374,28 @@ void CheckElevator(const std_msgs::String elevator) {
         }
     }
 
-    // 2층 도착//
+    // 2층 도착 //
     if (_ROBOT_FLAG == EV_1F_ARR) {
-        _ROBOT_LOCATE = SECOND_FLOOR;
         if (strcmp(elevator.data.c_str(), "second_open_out") == 0) {
             ROS_INFO("2F_ARRIVE");
             sleep(2);
             ultra.data = "exit";
             pubUltra.publish(ultra);
             sleep(2);
-            _ROBOT_FLAG = EV_EXIT;
+            _ROBOT_LOCATE = SECOND_FLOOR;
+            _ROBOT_FLAG = EV_2F_EXIT;
         }
     }
     // 1층 도착 //
     if (_ROBOT_FLAG == EV_2F_ARR) {
-        _ROBOT_LOCATE = FIRST_FLOOR;
         if (strcmp(elevator.data.c_str(), "first_open_out") == 0) {
             ROS_INFO("1F_ARRIVE");
             sleep(2);
             ultra.data = "exit";
             pubUltra.publish(ultra);
             sleep(2);
-            _ROBOT_FLAG = EV_EXIT;
+            _ROBOT_LOCATE = FIRST_FLOOR;
+            _ROBOT_FLAG = EV_1F_EXIT;
         }
     }
 }
@@ -438,3 +439,4 @@ int main(int argc, char** argv) {
 
     return 0; 
 }
+
