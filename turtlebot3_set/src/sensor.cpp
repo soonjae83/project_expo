@@ -142,7 +142,7 @@ public:
             exit_ev("ex_ev");
             delay(500);
             ROS_INFO("eixt_complete");
-            end.data= "end";
+            end.data= "complete";
             pubUltraEnd.publish(end);
         }
 
