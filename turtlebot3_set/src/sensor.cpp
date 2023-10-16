@@ -4,6 +4,7 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#include <cmath>
 #include <wiringPi.h>
 
 #include <ros/ros.h>
@@ -11,8 +12,11 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 
-#define Trig 15 // BCM 14 (WiringPi 15)
-#define Echo 26 // BCM 12 (WiringPi 26)
+#define Trig1 0  // BCM 17 (WiringPi 0)
+#define Echo1 2  // BCM 27 (WiringPi 2)
+
+#define Trig2 15 // BCM 14 (WiringPi 15)
+#define Echo2 26 // BCM 12 (WiringPi 26)
 
 using namespace std;
 
@@ -27,40 +31,76 @@ public:
 
     // 초음파 작동 //
     void ultra_move(string direction) {
+        while (ros::ok()) {
+            int start_time1, end_time1, start_time2, end_time2;
+            float distance1, distance2;
+            float target_distance = 12.5; // 목표 거리
+            float distance_difference_threshold = 0.01; // 거리 차이 허용 범위 (1cm)
 
-        int start_time, end_time;
-        float distance;
-
-        while (ros::ok())
-        {
-            digitalWrite(Trig, LOW);
-            delay(100);
-            digitalWrite(Trig, HIGH);
+            digitalWrite(Trig1, LOW);
+            delayMicroseconds(2);
+            digitalWrite(Trig1, HIGH);
             delayMicroseconds(10);
-            digitalWrite(Trig, LOW);
+            digitalWrite(Trig1, LOW);
 
-            while (digitalRead(Echo) == 0);
-            start_time = micros();
+            // 초음파 센서 1 읽기
+            while (digitalRead(Echo1) == 0);
+            start_time1 = micros();
+            while (digitalRead(Echo1) == 1);
+            end_time1 = micros();
 
-            while (digitalRead(Echo) == 1);
-            end_time = micros();
+            // 초음파 센서 2 읽기
+            digitalWrite(Trig2, LOW);
+            delayMicroseconds(2);
+            digitalWrite(Trig2, HIGH);
+            delayMicroseconds(10);
+            digitalWrite(Trig2, LOW);
 
-            distance = (end_time - start_time)/29./2.;
+            while (digitalRead(Echo2) == 0);
+            start_time2 = micros();
+            while (digitalRead(Echo2) == 1);
+            end_time2 = micros();
 
-            cout << "[INFO] Distance : " << distance << "cm\r" << endl;
+            distance1 = round((end_time1 - start_time1) / 29.0 / 2.0 * 100) / 100.0; // 반올림하여 소수점 두 자리까지 표시
+            distance2 = round((end_time2 - start_time2) / 29.0 / 2.0 * 100) / 100.0; // 반올림하여 소수점 두 자리까지 표시
+
+            ROS_INFO("[INFO] Distance1: %.2f cm", distance1);
+            ROS_INFO("[INFO] Distance2: %.2f cm", distance2);
 
             if (direction == "forward") {
-                if (distance > 12.5){
-                    cmd_vel.linear.x = 0.06;
+                // 두 초음파 센서의 거리 차이 계산
+                float distance_difference = distance1 - distance2;
+
+                // 거리 오차를 보정하여 로봇의 자세를 조절
+                if (distance_difference > distance_difference_threshold) {
+                    ROS_INFO("right_position");
+                    cmd_vel.angular.z = 0.1; // 오른쪽으로 약간 회전
+                    pubCmdvel.publish(cmd_vel);
+                } else if (distance_difference < -distance_difference_threshold) {
+                    ROS_INFO("left_position");
+                    cmd_vel.angular.z = -0.1; // 왼쪽으로 약간 회전
+                    pubCmdvel.publish(cmd_vel);
+                } else {
+                    ROS_INFO("alright");
+                    cmd_vel.angular.z = 0.0; // 오차가 허용 범위 안에 있으면 회전 중지
                     pubCmdvel.publish(cmd_vel);
                 }
-                else {
-                    cmd_vel.linear.x = 0.00;
+
+                // 만약 두 distance 값이 모두 12.5cm보다 작으면 루프를 빠져나감
+                if (distance1 < target_distance && distance2 < target_distance) {
+                    cmd_vel.linear.x = 0.0;
                     pubCmdvel.publish(cmd_vel);
                     ROS_INFO("STOP");
                     break;
                 }
-            }           
+
+                // 전진 속도 설정
+                ROS_INFO("go_straight");
+                cmd_vel.linear.x = 0.08;
+                pubCmdvel.publish(cmd_vel);
+            }
+
+            ros::Duration(0.1).sleep(); // 반복 주기를 조절할 수 있습니다.
         }
     }
 
@@ -124,6 +164,11 @@ public:
     }
 
     void subUltra(const std_msgs::String ultra) {
+        // 초음파 전진
+        if (strcmp(ultra.data.c_str(), "forward") == 0 ) {
+        ROS_INFO("Forward");
+        ultra_move("forward");
+        }
         // 90도 회전
         if (strcmp(ultra.data.c_str(), "right90") == 0 ) {
             ROS_INFO("90turn");
@@ -136,7 +181,7 @@ public:
             turn180deg("right");
         }
 
-        // 초음파 전진
+        // 엘베 탈출
         if (strcmp(ultra.data.c_str(), "exit") == 0 ) {
             ROS_INFO("Exit_EV");
             exit_ev("ex_ev");
@@ -184,8 +229,10 @@ int main(int argc, char**argv){
         return 1;
     }
 
-    pinMode(Trig, OUTPUT);
-    pinMode(Echo, INPUT);
+    pinMode(Trig1, OUTPUT);
+    pinMode(Trig2, OUTPUT);
+    pinMode(Echo1, INPUT);
+    pinMode(Echo2, INPUT);
     
     ROS_INFO("SET UP ULTRA SENSOR");
 
